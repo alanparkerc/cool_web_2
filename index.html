@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<title>three.js - kinect</title>
+		<meta charset="utf-8">
+		<meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
+		<link type="text/css" rel="stylesheet" href="style.css">
+	</head>
+	<body>
+
+    <canvas id="bg"></canvas>   
+
+    <main>
+
+      <header>
+        <h1>Jeff Delaney</h1>
+        <p>🚀 Welcome to my website!</p>
+      </header>
+
+
+      <blockquote>
+        <p>I like making stuff and putting it on the internet</p>
+      </blockquote>
+
+      <section>
+        <h2>📜 Manifesto</h2>
+        <p>
+          Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
+        </p>
+
+        <p>
+          Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
+        </p>
+
+        <p>
+          Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
+        </p>
+
+      </section>
+
+      </main>
+
+		<video id="video" loop muted crossOrigin="anonymous" playsinline style="display:none">
+			<!-- <source src="node_modules/three/examples/textures/kinect.webm"> -->
+			<source src="https://media.istockphoto.com/videos/colorful-abstract-animated-background-the-movement-of-a-transparent-video-id1316060289">
+		</video>
+
+		<script id="vs" type="x-shader/x-vertex">
+
+			uniform sampler2D map;
+
+			uniform float width;
+			uniform float height;
+			uniform float nearClipping, farClipping;
+
+			uniform float pointSize;
+			uniform float zOffset;
+
+			varying vec2 vUv;
+
+			const float XtoZ = 1.11146; // tan( 1.0144686 / 2.0 ) * 2.0;
+			const float YtoZ = 0.83359; // tan( 0.7898090 / 2.0 ) * 2.0;
+
+			void main() {
+
+				vUv = vec2( position.x / width, position.y / height );
+
+				vec4 color = texture2D( map, vUv );
+				float depth = ( color.r + color.g + color.b ) / 3.0;
+
+				// Projection code by @kcmic
+
+				float z = ( 1.0 - depth ) * (farClipping - nearClipping) + nearClipping;
+
+				vec4 pos = vec4(
+					( position.x / width - 0.5 ) * z * XtoZ,
+					( position.y / height - 0.5 ) * z * YtoZ,
+					- z + zOffset,
+					1.0);
+
+				gl_PointSize = pointSize;
+				gl_Position = projectionMatrix * modelViewMatrix * pos;
+
+			}
+
+		</script>
+
+		<script id="fs" type="x-shader/x-fragment">
+
+			uniform sampler2D map;
+
+			varying vec2 vUv;
+
+			void main() {
+
+				vec4 color = texture2D( map, vUv );
+				gl_FragColor = vec4( color.r, color.g, color.b, 0.2 );
+
+			}
+
+		</script>
+
+		<!-- Import maps polyfill -->
+		<!-- Remove this when import maps will be widely supported -->
+		<script async src="https://unpkg.com/es-module-shims@1.3.6/dist/es-module-shims.js"></script>
+
+		<script type="module" src="/main.js"></script>
+
+	</body>
+</html>
